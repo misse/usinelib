@@ -36,18 +36,18 @@ class UsineMenu:
     def __get_full_menu(self):
         url = 'http://www.usine.se/restaurang'
         headers = {
-            '_origin': 'http://www.usine.se/restaurang',
+            'Origin': 'http://www.usine.se/restaurang',
         }
         session = requests.Session()
         request = session.get(url, headers=headers)
         soup = BeautifulSoup(request.content, 'html.parser')
-        usine38_menu = soup.find_all('div', attrs={'id': 'lunch-bistro38_del'})
+        usine38_menu = soup.find_all('div', attrs={'id': 'lunch-bistro38Del'})
         return usine38_menu
 
     def __populate_weekly_veg_menu(self, _menu):
         for usine38_tag in _menu:
             menu_class = (
-                '_bredd100 _ruta_vit _ruta_marginal_upp_ner _marginal_bort_upp_ner'
+                'Bredd100 RutaVit RutaMarginalUppNer MarginalBortUppNer'
             )
             div_menu = usine38_tag.find_all(
                 'div',
@@ -57,7 +57,7 @@ class UsineMenu:
                 limit=1
             )
             for menu_tag in div_menu:
-                left_menu_class = '_bilder _bredd50 _ruta4'
+                left_menu_class = 'Bilder Bredd50 Ruta4'
                 div_left_menu = menu_tag.find_all(
                     'div',
                     attrs={
@@ -67,11 +67,11 @@ class UsineMenu:
                 )
                 for div_left_menu_tag in div_left_menu:
                     menu_class = [
-                        '_bredd100 _ruta_marginal_upp',
-                        '_bredd100 _ruta_marginal_upp_ner'
+                        'Bredd100 RuteMarginalUpp',
+                        'Bredd100 RuteMarginalUppNer'
                     ]
                     weekly_veg_class = [
-                        '_ruta_marginal_sidor'
+                        'RutaMarginalSidor'
                     ]
                     div_weekly_veg_entry = div_left_menu_tag.find_all(
                         'div',
@@ -80,10 +80,10 @@ class UsineMenu:
                         }
                     )
                     for weekly_veg_entry in div_weekly_veg_entry:
-                        if '_v_e_c_k_a_n_s _v_e_g_e_t_a_r_i_s_k_a' in weekly_veg_entry.text:
-                            dish_name_div = '_meny_ratt_rad_underrubrik'
-                            dish_desc_div = '_meny_ratt_rad_vanster'
-                            price_div = '_meny_ratt_rad_hoger_marginal'
+                        if 'VECKANS VEGETARISKA' in weekly_veg_entry.text:
+                            dish_name_div = 'MenyRattRadUnderrubrik'
+                            dish_desc_div = 'MenyRattRadVanster'
+                            price_div = 'MenyRattRadHogerMarginal'
                             dish_name_obj_list = weekly_veg_entry.find_all(
                                 'div',
                                 attrs={
@@ -102,14 +102,13 @@ class UsineMenu:
                                     'class': price_div
                                 }
                             )
-                    weekly_veg_list = []
 
                     for dish_name, dish_desc, price in zip(
                             dish_name_obj_list,
                             dish_desc_obj_list,
                             price_objlist
                     ):
-                        weekly_veg_list.append(
+                        self.weekly_veg_menu.append(
                             {
                                 'dish': "{name} - {desc}".format(
                                     name=dish_name.text,
@@ -118,12 +117,10 @@ class UsineMenu:
                                 'price': price.text.replace('\n', '')
                             }
                         )
-        return weekly_veg_list
-
     def __populate_classic_menu(self, _menu):
         for usine38_tag in _menu:
             menu_class = (
-                '_bredd100 _ruta_vit _ruta_marginal_upp_ner _marginal_bort_upp_ner'
+                'Bredd100 RutaVit RuteMarginalUppNer MarginalBortUppNer'
             )
             div_menu = usine38_tag.find_all(
                 'div',
@@ -133,7 +130,7 @@ class UsineMenu:
                 limit=1
             )
             for menu_tag in div_menu:
-                right_menu_class = '_bilder _bredd50 _ruta4 _ram_vanster_bred'
+                right_menu_class = 'Bilder Bredd50 ruta4 RamVansterBred'
                 div_right_menu = menu_tag.find_all(
                     'div',
                     attrs={
@@ -142,25 +139,25 @@ class UsineMenu:
                     limit=1
                 )
                 for right_menu_tag in div_right_menu:
-                    menu_class = '_bredd100 _ruta_marginal_upp_ner'
+                    menu_class = 'Bredd100 RuteMarginalUppNer'
                     classic_menu = right_menu_tag.find_all(
                         'div',
                         attrs={
                             'class': menu_class
                         }
                     )
-                    entry_class = '_meny_ratt_rad_hallare'
+                    entry_class = 'MenyRattRadHallare'
                     classic_menu_entries = classic_menu[0].find_all(
                         'div',
                         attrs={
                             'class': entry_class
                         }
                     )
-                    classic_menu_list = []
+                    self.classic_menu = []
                     for entry in classic_menu_entries:
-                        titel_class = '_meny_ratt_rad_underrubrik'
-                        dish_class = '_meny_ratt_rad_vanster'
-                        price_class = '_meny_ratt_rad_hoger'
+                        titel_class = 'MenyRattRadUnderrubrik'
+                        dish_class = 'MenyRattRadVanster'
+                        price_class = 'MenyRattRadHoger'
                         title = entry.find_all(
                             'div',
                             attrs={
@@ -182,20 +179,18 @@ class UsineMenu:
                         title = title[0].text
                         dish = dish[0].text
                         price = price[0].text.replace('\n', '')
-                        classic_menu_list.append(
+                        self.classic_menu.append(
                             {
                                 'title': title,
                                 'dish': dish,
                                 'price': price
                             }
                         )
-        return classic_menu_list
-
     def __populate_weekly_menu(self, _menu):
         weekly_menu = []
         for usine38_tag in _menu:
             menu_class = (
-                '_bredd100 _ruta_vit _ruta_marginal_upp_ner _marginal_bort_upp_ner'
+                'Bredd100 RutaVit RuteMarginalUppNer MarginalBortUppNer'
             )
             div_menu = usine38_tag.find_all(
                 'div',
@@ -205,7 +200,7 @@ class UsineMenu:
                 limit=1
             )
             for menu_tag in div_menu:
-                left_menu_class = '_bilder _bredd50 _ruta4'
+                left_menu_class = 'Bilder Bredd50 ruta4'
                 div_left_menu = menu_tag.find_all(
                     'div',
                     attrs={
@@ -215,8 +210,8 @@ class UsineMenu:
                 )
                 for div_left_menu_tag in div_left_menu:
                     menu_class = [
-                        '_bredd100 _ruta_marginal_upp',
-                        '_bredd100 _ruta_marginal_upp_ner'
+                        'Bredd100 RuteMarginalUpp',
+                        'Bredd100 RuteMarginalUppNer'
                     ]
                     div_menu_entry = div_left_menu_tag.find_all(
                         'div',
@@ -227,9 +222,9 @@ class UsineMenu:
                     del div_menu_entry[0]
                     index = 0
                     for menu_entry in div_menu_entry:
-                        day_div = '_meny_ratt_rubrik _ram_ner_minst'
-                        dish_title_div = '_meny_ratt_rad_underrubrik'
-                        dish_desc_div = '_meny_ratt_rad_vanster'
+                        day_div = 'MenyRattRubrik RamNerMinst'
+                        dish_title_div = 'MenyRattRadUnderrubrik'
+                        dish_desc_div = 'MenyRattRadVanster'
                         day_obj = menu_entry.find_all(
                             'div',
                             attrs={
@@ -248,7 +243,7 @@ class UsineMenu:
                                 dish_desc_div
                             }
                         )
-                        price_div = '_meny_ratt_rad_hoger_marginal'
+                        price_div = 'MenyRattRadHogerMarginal'
                         price_obj = menu_entry.find_all(
                             'div',
                             attrs={
@@ -315,8 +310,8 @@ class UsineMenu:
     def get_menus(self):
         """ fetches html and parses/cleans it for menu information """
         self.menu = self.__get_full_menu()
-        self.weekly_veg_menu = self.__populate_weekly_veg_menu(self.menu)
-        self.classic_menu = self.__populate_classic_menu(self.menu)
+        self.__populate_weekly_veg_menu(self.menu)
+        self.__populate_classic_menu(self.menu)
         weekly_menu = self.__populate_weekly_menu(self.menu)
         self.weekly_menu = self.__cleanup_weekly_menu(weekly_menu)
         return self.weekly_menu, self.weekly_veg_menu, self.classic_menu
@@ -364,22 +359,22 @@ class UsineMenu:
                     if schnitzel_day:
                         greeting = (
                             "_hallo {name}, "
-                            "heute ist der grosse _schnitzeltag: ".format(
+                            "heute ist der grosse Schnitzeltag: ".format(
                                 name=user['friendlyname']
                             )
                         )
                         ending = (
-                            "\n\n_ich wünsche _ihnen einen schönen schnitzel" +
+                            "\n\nIch wünsche Ihnen einen schönen schnitzel" +
                             self.week_days_ger[self.today_num]
                         )
                     else:
                         greeting = (
-                            "_hi {name}, today usine is serving: ".format(
+                            "Hi {name}, today usine is serving: ".format(
                                 name=user['friendlyname']
                             )
                         )
                         ending = (
-                            "\n\n_have a great {day}!".format(
+                            "\n\nHave a great {day}!".format(
                                 day=self.week_days_eng[self.today_num]
                             )
                         )
@@ -406,7 +401,7 @@ class UsineMenu:
                     user=user['friendlyname']
                 )
                 ending = (
-                    "\n\n_have a great {day}!".format(
+                    "\n\nHave a great {day}!".format(
                         day=self.week_days_eng[self.today_num]
                     )
                 )

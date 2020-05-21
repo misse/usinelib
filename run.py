@@ -1,19 +1,14 @@
-# usinelib
-
-## Usage
-``` 
 import usinelib
-
-users = [
-    {
-        "username": "test",
-        "friendlyname": "Test Testsson",
-        "number": "46123123123"
-    }
-]
 
 
 def main():
+    users = [
+        {
+            "username": "test",
+            "friendlyname": "Test Testsson",
+            "number": "46123123123"
+        }
+    ]
     usine_menu = usinelib.UsineMenu()
     debug = True
     weekly_menu, weekly_veg_menu, classic_menu = usine_menu.get_menus()
@@ -24,9 +19,7 @@ def main():
             print(classic['dish'])
         for veg in weekly_veg_menu:
             print(veg['dish'])
-    usineMenu.notify_users(users, debug)
-
+    usine_menu.notify_users(users, debug)
 
 if __name__ == '__main__':
     main()
-```

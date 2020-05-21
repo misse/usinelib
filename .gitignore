@@ -1,4 +1,6 @@
+__pycache__/
+.vscode/
+.env/
 build/
 dist/
 *.egg*/
-__pycache__/

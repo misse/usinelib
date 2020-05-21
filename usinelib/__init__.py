@@ -27,6 +27,7 @@ class UsineMenu:
             "Samstag",
             "Sonntag",
         ]
+        self.weekly_menu_unformatted = []
         self.weekly_menu = []
         self.weekly_veg_menu = []
         self.classic_menu = []
@@ -41,11 +42,10 @@ class UsineMenu:
         session = requests.Session()
         request = session.get(url, headers=headers)
         soup = BeautifulSoup(request.content, 'html.parser')
-        usine38_menu = soup.find_all('div', attrs={'id': 'lunch-bistro38Del'})
-        return usine38_menu
-
-    def __populate_weekly_veg_menu(self, _menu):
-        for usine38_tag in _menu:
+        self.menu = soup.find_all('div', attrs={'id': 'lunch-bistro38Del'})
+    
+    def __populate_weekly_veg_menu(self,):
+        for usine38_tag in self.menu:
             menu_class = (
                 'Bredd100 RutaVit RutaMarginalUppNer MarginalBortUppNer'
             )
@@ -67,8 +67,8 @@ class UsineMenu:
                 )
                 for div_left_menu_tag in div_left_menu:
                     menu_class = [
-                        'Bredd100 RuteMarginalUpp',
-                        'Bredd100 RuteMarginalUppNer'
+                        'Bredd100 RutaMarginalUpp',
+                        'Bredd100 RutaMarginalUppNer'
                     ]
                     weekly_veg_class = [
                         'RutaMarginalSidor'
@@ -117,10 +117,10 @@ class UsineMenu:
                                 'price': price.text.replace('\n', '')
                             }
                         )
-    def __populate_classic_menu(self, _menu):
-        for usine38_tag in _menu:
+    def __populate_classic_menu(self):
+        for usine38_tag in self.menu:
             menu_class = (
-                'Bredd100 RutaVit RuteMarginalUppNer MarginalBortUppNer'
+                'Bredd100 RutaVit RutaMarginalUppNer MarginalBortUppNer'
             )
             div_menu = usine38_tag.find_all(
                 'div',
@@ -130,7 +130,7 @@ class UsineMenu:
                 limit=1
             )
             for menu_tag in div_menu:
-                right_menu_class = 'Bilder Bredd50 ruta4 RamVansterBred'
+                right_menu_class = 'Bilder Bredd50 Ruta4 RamVansterBred'
                 div_right_menu = menu_tag.find_all(
                     'div',
                     attrs={
@@ -139,7 +139,7 @@ class UsineMenu:
                     limit=1
                 )
                 for right_menu_tag in div_right_menu:
-                    menu_class = 'Bredd100 RuteMarginalUppNer'
+                    menu_class = 'Bredd100 RutaMarginalUppNer'
                     classic_menu = right_menu_tag.find_all(
                         'div',
                         attrs={
@@ -186,11 +186,10 @@ class UsineMenu:
                                 'price': price
                             }
                         )
-    def __populate_weekly_menu(self, _menu):
-        weekly_menu = []
-        for usine38_tag in _menu:
+    def __populate_weekly_menu(self):
+        for usine38_tag in self.menu:
             menu_class = (
-                'Bredd100 RutaVit RuteMarginalUppNer MarginalBortUppNer'
+                'Bredd100 RutaVit RutaMarginalUppNer MarginalBortUppNer'
             )
             div_menu = usine38_tag.find_all(
                 'div',
@@ -200,7 +199,7 @@ class UsineMenu:
                 limit=1
             )
             for menu_tag in div_menu:
-                left_menu_class = 'Bilder Bredd50 ruta4'
+                left_menu_class = 'Bilder Bredd50 Ruta4'
                 div_left_menu = menu_tag.find_all(
                     'div',
                     attrs={
@@ -210,8 +209,8 @@ class UsineMenu:
                 )
                 for div_left_menu_tag in div_left_menu:
                     menu_class = [
-                        'Bredd100 RuteMarginalUpp',
-                        'Bredd100 RuteMarginalUppNer'
+                        'Bredd100 RutaMarginalUpp',
+                        'Bredd100 RutaMarginalUppNer'
                     ]
                     div_menu_entry = div_left_menu_tag.find_all(
                         'div',
@@ -260,7 +259,7 @@ class UsineMenu:
                             desc=dish_desc
                         ).strip()
                         price = price_obj[0].text.replace('\n', '')
-                        weekly_menu.append(
+                        self.weekly_menu_unformatted.append(
                             [
                                 day,
                                 dish,
@@ -270,12 +269,11 @@ class UsineMenu:
                         if 'fredag' in day.lower() or index == 4:
                             break
                         index += 1
-        return weekly_menu
 
-    def __cleanup_weekly_menu(self, menu):
-        weekly_menu = []
+    def __cleanup_weekly_menu(self):
         year = datetime.date.today().year
-        for row in menu:
+        self.weekly_menu = []
+        for row in self.weekly_menu_unformatted:
             day = (row[0].split()[1].split('/')[0])
             month = (row[0].split()[1].split('/')[1])
             dish = row[1]
@@ -286,21 +284,20 @@ class UsineMenu:
                     str(month),
                     str(day)]
             )
-            date_obj = datetime.datetime.strptime(date_str, "%_y-%m-%d").date()
-            weekly_menu.append(
+            date_obj = datetime.datetime.strptime(date_str, "%Y-%m-%d").date()
+            self.weekly_menu.append(
                 {
                     'date': date_obj,
                     'dish': dish,
                     'price': price
                 }
             )
-        return weekly_menu
 
-    def __todays_lunch(self, menu):
+    def __todays_lunch(self):
         today = datetime.date.today()
         todays_lunch = next(
             (
-                days for days in menu
+                days for days in self.menu
                 if today == days['date']
             ),
             False
@@ -309,11 +306,11 @@ class UsineMenu:
 
     def get_menus(self):
         """ fetches html and parses/cleans it for menu information """
-        self.menu = self.__get_full_menu()
-        self.__populate_weekly_veg_menu(self.menu)
-        self.__populate_classic_menu(self.menu)
-        weekly_menu = self.__populate_weekly_menu(self.menu)
-        self.weekly_menu = self.__cleanup_weekly_menu(weekly_menu)
+        self.__get_full_menu()
+        self.__populate_weekly_veg_menu()
+        self.__populate_classic_menu()
+        self.__populate_weekly_menu()
+        self.__cleanup_weekly_menu()
         return self.weekly_menu, self.weekly_veg_menu, self.classic_menu
 
     def notify_users(self, users, debug):

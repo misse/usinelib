@@ -43,7 +43,7 @@ class UsineMenu:
         request = session.get(url, headers=headers)
         soup = BeautifulSoup(request.content, 'html.parser')
         self.menu = soup.find_all('div', attrs={'id': 'lunch-bistro38Del'})
-    
+
     def __populate_weekly_veg_menu(self,):
         for usine38_tag in self.menu:
             menu_class = (

@@ -35,9 +35,9 @@ class UsineMenu:
         self.today_num = datetime.datetime.today().weekday()
 
     def __get_full_menu(self):
-        url = 'http://www.usine.se/restaurang'
+        url = 'http://www.usine.se/bistro38'
         headers = {
-            'Origin': 'http://www.usine.se/restaurang',
+            'Origin': 'http://www.usine.se/bistro38',
         }
         session = requests.Session()
         request = session.get(url, headers=headers)
@@ -346,7 +346,7 @@ class UsineMenu:
                         ):
                             message = (
                                 message +
-                                "\n\n_but on {day}: {dish}!!!!".format(
+                                "\n\nBut on {day}: {dish}!!!!".format(
                                     day=self.week_days_eng[day['date'].weekday()],
                                     dish=day['dish']
                                 )
